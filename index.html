@@ -111,7 +111,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .status-text{font-size:.6rem;letter-spacing:.13em;color:var(--text2)}
 
-.canvas-wrapper{position:fixed;left:0;right:0;top:0;bottom:0;max-width:none;flex:none}
+.canvas-wrapper{position:fixed;left:0;right:0;top:0;bottom:0;max-width:none;flex:none;touch-action:none}
 .corner{position:absolute;width:16px;height:16px;z-index:2;pointer-events:none}
 .corner::before,.corner::after{content:'';position:absolute;
   background:var(--accent);box-shadow:0 0 7px var(--glow);transition:background .4s}
@@ -122,7 +122,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .corner.bl{bottom:0;left:0}.corner.bl::before,.corner.bl::after{top:auto;bottom:0}
 .corner.br{bottom:0;right:0}.corner.br::before{left:auto;right:0;top:auto;bottom:0}.corner.br::after{top:auto;bottom:0}
 
-canvas{display:block;width:100%;height:100%;background:var(--bg3);transition:background .4s}
+canvas{display:block;width:100%;height:100%;background:var(--bg3);transition:background .4s;touch-action:none}
 
 .overlay{position:absolute;inset:0;z-index:10;
   display:flex;flex-direction:column;align-items:center;justify-content:center;

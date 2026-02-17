@@ -474,16 +474,30 @@ const DMAP={
   w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},
   W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0},
 };
+const SWIPE_MIN_PX = 24;
+let touchStartX = 0, touchStartY = 0, touchTracking = false;
+
+function queueDirection(nd){
+  const lastQueued = nextDirs.length ? nextDirs[nextDirs.length-1] : dir;
+  if(nd.x===lastQueued.x && nd.y===lastQueued.y) return;
+  if(nd.x===-lastQueued.x && nd.y===-lastQueued.y) return;
+  if(nextDirs.length<3) nextDirs.push(nd);
+}
+
+function directionFromSwipe(dx, dy){
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  if(ax < SWIPE_MIN_PX && ay < SWIPE_MIN_PX) return null;
+  if(ax > ay) return dx > 0 ? {x:1,y:0} : {x:-1,y:0};
+  return dy > 0 ? {x:0,y:1} : {x:0,y:-1};
+}
+
 document.addEventListener("keydown",e=>{
   const nd=DMAP[e.key];
   if(nd){
     e.preventDefault();
     if(gameState==="idle") return beginGame();
     if(gameState==="running"){
-      const lastQueued = nextDirs.length ? nextDirs[nextDirs.length-1] : dir;
-      if(nd.x===lastQueued.x && nd.y===lastQueued.y) return;
-      if(nd.x===-lastQueued.x && nd.y===-lastQueued.y) return;
-      if(nextDirs.length<3) nextDirs.push(nd);
+      queueDirection(nd);
     }
     return;
   }
@@ -491,6 +505,37 @@ document.addEventListener("keydown",e=>{
     e.preventDefault();
     if(gameState==="running"||gameState==="paused") togglePause();
   }
+});
+
+canvas.addEventListener("touchstart", (e)=>{
+  if(e.touches.length!==1) return;
+  touchTracking = true;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive:false });
+
+canvas.addEventListener("touchmove", (e)=>{
+  if(!touchTracking) return;
+  e.preventDefault();
+}, { passive:false });
+
+canvas.addEventListener("touchend", (e)=>{
+  if(!touchTracking) return;
+  touchTracking = false;
+  if(!e.changedTouches.length) return;
+  const t = e.changedTouches[0];
+  const nd = directionFromSwipe(t.clientX - touchStartX, t.clientY - touchStartY);
+  if(!nd) return;
+  e.preventDefault();
+  if(gameState==="idle"){
+    beginGame();
+    return queueDirection(nd);
+  }
+  if(gameState==="running") queueDirection(nd);
+}, { passive:false });
+
+canvas.addEventListener("touchcancel", ()=>{
+  touchTracking = false;
 });
 
 document.getElementById("startBtn").addEventListener("click",beginGame);
